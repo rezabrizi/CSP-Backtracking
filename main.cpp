@@ -249,7 +249,10 @@ public:
 
         std::vector<std::pair<int, int>> sortable(choices.begin(), choices.end());
         std::sort(sortable.begin(), sortable.end(), [](const std::pair<int, int>& a, const std::pair<int, int>& b) {
-            return a.second > b.second; // Sorting in ascending order
+            if (a.second == b.second) {
+                return a.first < b.first;
+            }
+            return a.second > b.second;
         });
 
         std::vector<int> sortedValues;
@@ -349,7 +352,7 @@ public:
     }
 
 
-    void print_failure(const std::vector<char>& var_ordering, int i)
+    void print_failure(const std::vector<char>& var_ordering, int i, int curr_value_fail)
     {
         /**
          * print a failure with the consistent variable ordering and the correct index of the failure branch
@@ -357,13 +360,15 @@ public:
          std::cout << std::to_string(i) << ". ";
          for (int j = 0; j < var_ordering.size(); j++)
          {
-             std::cout << var_ordering[j] << "=" << std::to_string(assignment.at(var_ordering[j]));
+
              if (j == var_ordering.size()-1)
              {
+                 std::cout << var_ordering[j] << "=" << std::to_string(curr_value_fail);
                  std::cout << "  failure\n";
              }
              else
              {
+                 std::cout << var_ordering[j] << "=" << std::to_string(assignment.at(var_ordering[j]));
                  std::cout << ", ";
              }
          }
@@ -401,7 +406,6 @@ bool RecursiveBacktrackSearch(int& i, std::vector<char>& order_vars_assigned, CS
         // we need to print variables in order
         i++;
         csp.print_success(order_vars_assigned, i);
-        std::cout << " solution\n";
         return true;
     }
 
@@ -441,7 +445,7 @@ bool RecursiveBacktrackSearch(int& i, std::vector<char>& order_vars_assigned, CS
 
             // at this point we know for sure we can have one more branch in the search tree
             // so increment the i
-            i++;
+
             if (RecursiveBacktrackSearch(i, order_vars_assigned, csp)) {
                 return true;
             }
@@ -457,8 +461,7 @@ bool RecursiveBacktrackSearch(int& i, std::vector<char>& order_vars_assigned, CS
         // we can print assignment here + the value that was just chosen
         // we need to print variables in order
         i++;
-        csp.print_failure(order_vars_assigned, i);
-        std::cout <<"  failure\n";
+        csp.print_failure(order_vars_assigned, i, value);
     }
     // at this point we reached a failure. We can print it
     i++;
@@ -545,6 +548,7 @@ int main(int argc, char *argv[]) {
     std::cout << std::endl;
 
     csp.print_constraints();
+    BacktrackSearch(csp);
 
     return 0;
 }
