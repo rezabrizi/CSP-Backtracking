@@ -9,7 +9,7 @@
 					"jsonFile" : "directory-.-Debug-f5ebdc15457944623624.json",
 					"minimumCMakeVersion" : 
 					{
-						"string" : "3.27"
+						"string" : "3.26"
 					},
 					"projectIndex" : 0,
 					"source" : ".",
@@ -49,12 +49,12 @@
 	"kind" : "codemodel",
 	"paths" : 
 	{
-		"build" : "/Users/rezatabrizi/dev/CLionProjects/CS4365HW2-CSP/cmake-build-debug",
-		"source" : "/Users/rezatabrizi/dev/CLionProjects/CS4365HW2-CSP"
+		"build" : "/Users/rezatabrizi/dev/CLionProjects/CSP-Backtracking/cmake-build-debug",
+		"source" : "/Users/rezatabrizi/dev/CLionProjects/CSP-Backtracking"
 	},
 	"version" : 
 	{
 		"major" : 2,
-		"minor" : 6
+		"minor" : 5
 	}
 }

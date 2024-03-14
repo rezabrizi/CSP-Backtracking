@@ -1,4 +1,4 @@
-# Install script for directory: /Users/rezatabrizi/dev/CLionProjects/CS4365HW2-CSP
+# Install script for directory: /Users/rezatabrizi/dev/CLionProjects/CSP-Backtracking
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
@@ -45,5 +45,5 @@ endif()
 
 string(REPLACE ";" "\n" CMAKE_INSTALL_MANIFEST_CONTENT
        "${CMAKE_INSTALL_MANIFEST_FILES}")
-file(WRITE "/Users/rezatabrizi/dev/CLionProjects/CS4365HW2-CSP/cmake-build-debug/${CMAKE_INSTALL_MANIFEST}"
+file(WRITE "/Users/rezatabrizi/dev/CLionProjects/CSP-Backtracking/cmake-build-debug/${CMAKE_INSTALL_MANIFEST}"
      "${CMAKE_INSTALL_MANIFEST_CONTENT}")
