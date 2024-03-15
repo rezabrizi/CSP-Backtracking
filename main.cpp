@@ -10,7 +10,7 @@
 /**
  * a hashmap to map an operator with a function to check a constraint
  */
-std::unordered_map<char, std::function<bool(int, int)>> opMap = {
+std::unordered_map<char, std::function<bool(int, int)>> operation_map = {
         {'=', [](int a, int b) { return a == b; }},
         {'!', [](int a, int b) { return a != b; }},
         {'>', [](int a, int b) { return a > b; }},
@@ -53,7 +53,8 @@ public:
         return assignment.size() == domain.size();
     }
 
-    bool IsSolution() {
+
+    bool is_solution() {
         /**
          * Check if every constraint passes the current assignment of variables
          * This function is only called whenever we have a complete assignment of variables
@@ -61,7 +62,7 @@ public:
 
         for (const auto& constraint: constraints)
         {
-            if (!opMap.at(constraint.op)(assignment.at(constraint.var1), assignment.at(constraint.var2)))
+            if (!operation_map.at(constraint.op)(assignment.at(constraint.var1), assignment.at(constraint.var2)))
             {
                 return false;
             }
@@ -72,7 +73,7 @@ public:
     }
 
 
-    bool IsConsistent(char variable, int value) const
+    bool is_consistent(char variable, int value) const
     {
         /**
          * Check that the variable and value assigned to it passes the constraint it involves.
@@ -90,8 +91,8 @@ public:
                     int other_value = it->second; // Get the assigned value for the other variable
 
                     // Perform the check based on who is var1 and who is var2 in the constraint
-                    if ((constraint.var1 == variable && !opMap.at(constraint.op)(value, other_value)) ||
-                        (constraint.var2 == variable && !opMap.at(constraint.op)(other_value, value))) {
+                    if ((constraint.var1 == variable && !operation_map.at(constraint.op)(value, other_value)) ||
+                        (constraint.var2 == variable && !operation_map.at(constraint.op)(other_value, value))) {
                         return false;
                     }
                 }
@@ -149,7 +150,7 @@ public:
     }
 
 
-    char SelectVariable() const
+    char select_variable() const
     {
 
         /**
@@ -224,7 +225,7 @@ public:
     }
 
 
-    std::vector<int> SelectValues(char variable) const
+    std::vector<int> select_values(char variable) const
     {
         /**
          * Given a variable check all of the values in its domain and assign a ranking based on the least constraining value
@@ -238,8 +239,8 @@ public:
             for (const auto& constraint : involved_constraints) {
                 char other_var = (variable == constraint.var1) ? constraint.var2 : constraint.var1;
                 for (int other_value : domain.at(other_var)) {
-                    if ((variable == constraint.var1 && opMap.at(constraint.op)(curr_value, other_value)) ||
-                        (variable == constraint.var2 && opMap.at(constraint.op)(other_value, curr_value))) {
+                    if ((variable == constraint.var1 && operation_map.at(constraint.op)(curr_value, other_value)) ||
+                        (variable == constraint.var2 && operation_map.at(constraint.op)(other_value, curr_value))) {
                         constraint_satisfaction_count++;
                     }
                 }
@@ -264,7 +265,7 @@ public:
     }
 
 
-    std::unordered_map<char, std::vector<int>> ForwardChecking(char variable, int value) {
+    std::unordered_map<char, std::vector<int>> forward_checking(char variable, int value) {
         /**
          * Given a variable and a value eliminate values from the domain of the unassigned variables that have a constraint with the chosen variable
          * if one of the unassigned variables ends up having 0 values in it's domain then do nothing and return an empty domain
@@ -279,8 +280,8 @@ public:
 
             std::vector<int> other_var_new_domain;
             for (int other_value: domain.at(other_var)) {
-                if ((variable == constraint.var1 && opMap.at(constraint.op)(value, other_value)) ||
-                    (variable == constraint.var2 && opMap.at(constraint.op)(other_value, value))) {
+                if ((variable == constraint.var1 && operation_map.at(constraint.op)(value, other_value)) ||
+                    (variable == constraint.var2 && operation_map.at(constraint.op)(other_value, value))) {
                     other_var_new_domain.push_back(other_value);
                 }
             }
@@ -380,7 +381,6 @@ public:
         /**
          * print a success with the consistent variable ordering and the correct index of the failure branch
          */
-
         std::cout << std::to_string(i) << ". ";
         for (int j = 0; j < var_ordering.size(); j++)
         {
@@ -400,9 +400,9 @@ public:
 
 
 
-bool RecursiveBacktrackSearch(int& i, std::vector<char>& order_vars_assigned, CSP& csp) {
+bool recursive_backtrack_search(int& i, std::vector<char>& order_vars_assigned, CSP& csp) {
     // Here we check if the assignment is complete
-    if (csp.is_complete_assignment() && csp.IsSolution()) {
+    if (csp.is_complete_assignment() && csp.is_solution()) {
         // we need to print variables in order
         i++;
         csp.print_success(order_vars_assigned, i);
@@ -410,17 +410,16 @@ bool RecursiveBacktrackSearch(int& i, std::vector<char>& order_vars_assigned, CS
     }
 
     // select the next variable from the domain based on un-assigned variables and the current domain
-    char variable = csp.SelectVariable();
+    char variable = csp.select_variable();
     order_vars_assigned.push_back(variable);
 
     // create value selection vector based on the least constraining value heuristic
-    std::vector<int> values_least_cnst_hstc = csp.SelectValues(variable);
-
+    std::vector<int> values_least_cnst_hstc = csp.select_values(variable);
     for (int value : values_least_cnst_hstc) {
         // a variable and a value was available in the domain
-
         // does the new variable=value assignment pass all the constraints...?
-        if (csp.IsConsistent(variable, value)) {
+        if (csp.is_consistent(variable, value)) {
+
             // ... YES it does so let's continue searching
 
             // if we are performing forward checking then see if we reach a dead end or not
@@ -430,7 +429,7 @@ bool RecursiveBacktrackSearch(int& i, std::vector<char>& order_vars_assigned, CS
             std::unordered_map<char, std::vector<int>> old_domain;
 
             if (csp.mode == "fc") {
-                old_domain = csp.ForwardChecking(variable, value);
+                old_domain = csp.forward_checking(variable, value);
                 if (old_domain.empty())
                 {
                     // ... we can't continue the search
@@ -446,7 +445,7 @@ bool RecursiveBacktrackSearch(int& i, std::vector<char>& order_vars_assigned, CS
             // at this point we know for sure we can have one more branch in the search tree
             // so increment the i
 
-            if (RecursiveBacktrackSearch(i, order_vars_assigned, csp)) {
+            if (recursive_backtrack_search(i, order_vars_assigned, csp)) {
                 return true;
             }
 
@@ -455,27 +454,32 @@ bool RecursiveBacktrackSearch(int& i, std::vector<char>& order_vars_assigned, CS
                 // restore the domain first
                 csp.restore_domain(old_domain);
             }
+
             // un-assign the variable
             csp.un_assign_variable(variable);
         }
-        // we can print assignment here + the value that was just chosen
-        // we need to print variables in order
-        i++;
-        csp.print_failure(order_vars_assigned, i, value);
+        else{
+            // we can print assignment here + the value that was just chosen
+            // we need to print variables in order
+            i++;
+            csp.print_failure(order_vars_assigned, i, value);
+        }
+
     }
     // at this point we reached a failure. We can print it
-    i++;
+    order_vars_assigned.pop_back();
     return false;
 }
 
 
-void BacktrackSearch(CSP& csp) {
+void backtrack_search(CSP& csp) {
     std::vector<char> order_vars_assigned;
     int i = 0;
-    RecursiveBacktrackSearch(i, order_vars_assigned, csp);
+    recursive_backtrack_search(i, order_vars_assigned, csp);
 }
 
-std::unordered_map<char, std::vector<int>> GetVariables (const std::string& var_file_path)
+
+std::unordered_map<char, std::vector<int>> get_variables_from_file (const std::string& var_file_path)
 {
     std::unordered_map<char,std::vector<int>> variables;
     std::ifstream file(var_file_path);
@@ -501,7 +505,7 @@ std::unordered_map<char, std::vector<int>> GetVariables (const std::string& var_
 }
 
 
-std::vector<Constraint> GetConstraints (const std::string& const_file_path)
+std::vector<Constraint> get_constraints_from_file (const std::string& const_file_path)
 {
     std::vector<Constraint> constraints;
 
@@ -522,13 +526,12 @@ std::vector<Constraint> GetConstraints (const std::string& const_file_path)
 
 int main(int argc, char *argv[]) {
 
-    // Check for at least 3 arguments (excluding the program name)
-    if (argc < 4) {
+    if (argc < 4)
+    {
         std::cerr << "Usage: " << argv[0] << " <path_to_var_file> <path_to_con_file> <none|fc>" << std::endl;
         return 1;
     }
 
-    // Assigning the arguments to domain for easier access
     std::string path_to_var_file = argv[1];
     std::string path_to_con_file = argv[2];
     std::string mode = argv[3];
@@ -538,17 +541,12 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
-    std::unordered_map<char, std::vector<int>> variables = GetVariables(path_to_var_file);
-    std::vector<Constraint> constraints = GetConstraints(path_to_con_file);
+    std::unordered_map<char, std::vector<int>> variables = get_variables_from_file(path_to_var_file);
+    std::vector<Constraint> constraints = get_constraints_from_file(path_to_con_file);
 
 
     CSP csp (variables, constraints, mode);
-    csp.print_domain();
-    std::cout << std::endl;
-    std::cout << std::endl;
-
-    csp.print_constraints();
-    BacktrackSearch(csp);
+    backtrack_search(csp);
 
     return 0;
 }
